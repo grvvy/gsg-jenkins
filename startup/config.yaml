@@ -1,0 +1,63 @@
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - gitHubApp:
+          appID: "145061"
+          id: "github-webhooks"
+          privateKey: ${GH_APP_KEY}
+jenkins:
+  authorizationStrategy:
+    globalMatrix:
+      permissions:
+      - "GROUP:Overall/Administer:authenticated"
+      - "USER:Job/Read:anonymous"
+      - "USER:Overall/Read:anonymous"
+  numExecutors: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+      - id: ${JENKINS_ADMIN_ID}
+        password: ${JENKINS_ADMIN_PASSWORD}
+  clouds:
+    - docker:
+        name: "docker-cloud"
+        dockerApi:
+          dockerHost:
+            uri: "unix:///var/run/docker.sock"
+        templates:
+          - labelString: "docker-agent"
+            dockerTemplateBase:
+              image: "gravejac/gsg-test-server:0.1"
+              privileged: true
+              volumesFromString: "jenkins-controller"
+            remoteFs: "/home/jenkins/agent"
+            connector:
+              attach:
+                user: "jenkins"
+            instanceCapStr: "1"
+            retentionStrategy:
+              idleMinutes: 1
+security:
+  queueItemAuthenticator:
+    authenticators:
+    - global:
+        strategy: triggeringUsersAuthorizationStrategy
+jobs:
+  - file: /startup/job.groovy
+unclassified:
+  location:
+    url: https://greatscottgadgets.schneiderlab.com/
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+    endpoints:
+    - apiUri: "https://api.github.com"
+      name: "github"
+  gitHubPluginConfig:
+    hookUrl: "https://greatscottgadgets.schneiderlab.com/github-webhook/"
+  timestamper:
+    allPipelines: false
+    elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+    systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
