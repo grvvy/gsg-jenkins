@@ -43,7 +43,7 @@ jenkins:
             cpuPeriod: 0
             cpuQuota: 0
             image: "jenkins/jnlp-agent-docker"
-          instanceCapStr: "5"
+          instanceCapStr: "1"
           labelString: "jnlp-agent"
           name: "jnlp-agent"
           pullStrategy: PULL_ALWAYS
