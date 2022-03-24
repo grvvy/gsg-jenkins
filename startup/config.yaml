@@ -23,23 +23,31 @@ jenkins:
         password: ${JENKINS_ADMIN_PASSWORD}
   clouds:
     - docker:
-        name: "docker-cloud"
         dockerApi:
+          connectTimeout: 60
           dockerHost:
-            uri: "unix:///var/run/docker.sock"
+            uri: "tcp://192.168.0.5:2376"
+          readTimeout: 60
+        exposeDockerHost: true
+        name: "docker"
         templates:
-          - labelString: "docker-agent"
-            dockerTemplateBase:
-              image: "gravejac/gsg-test-server:0.1"
-              privileged: true
-              volumesFromString: "jenkins-controller"
-            remoteFs: "/home/jenkins/agent"
-            connector:
-              attach:
-                user: "jenkins"
-            instanceCapStr: "1"
-            retentionStrategy:
-              idleMinutes: 1
+        - connector:
+            jnlp:
+              jenkinsUrl: "http://192.168.0.5:8080/"
+              jnlpLauncher:
+                workDirSettings:
+                  disabled: false
+                  failIfWorkDirIsMissing: false
+                  internalDir: "remoting"
+          dockerTemplateBase:
+            cpuPeriod: 0
+            cpuQuota: 0
+            image: "jenkins/jnlp-agent-docker"
+          instanceCapStr: "5"
+          labelString: "jnlp-agent"
+          name: "jnlp-agent"
+          pullStrategy: PULL_ALWAYS
+          pullTimeout: 300
 security:
   queueItemAuthenticator:
     authenticators:
@@ -49,14 +57,14 @@ jobs:
   - file: /startup/job.groovy
 unclassified:
   location:
-    url: https://greatscottgadgets.schneiderlab.com/
+    url: http://192.168.0.5:8080/
   gitHubConfiguration:
     apiRateLimitChecker: ThrottleForNormalize
     endpoints:
     - apiUri: "https://api.github.com"
       name: "github"
   gitHubPluginConfig:
-    hookUrl: "https://greatscottgadgets.schneiderlab.com/github-webhook/"
+    hookUrl: "http://192.168.0.5:8080/github-webhook/"
   timestamper:
     allPipelines: false
     elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"

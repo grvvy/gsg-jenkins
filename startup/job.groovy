@@ -2,7 +2,7 @@ organizationFolder('gsg-org') {
     organizations {
         github {
             apiUri('https://api.github.com')
-            credentialsId('github-app-gsg')
+            credentialsId('github-webhooks')
             repoOwner('grvvy')
             traits {
                 gitHubBranchDiscovery {
