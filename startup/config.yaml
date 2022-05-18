@@ -13,7 +13,7 @@ jenkins:
       - "GROUP:Overall/Administer:authenticated"
       - "USER:Job/Read:anonymous"
       - "USER:Overall/Read:anonymous"
-  numExecutors: 0
+  numExecutors: 1
   securityRealm:
     local:
       allowsSignup: false
@@ -21,33 +21,6 @@ jenkins:
       users:
       - id: ${JENKINS_ADMIN_ID}
         password: ${JENKINS_ADMIN_PASSWORD}
-  clouds:
-    - docker:
-        dockerApi:
-          connectTimeout: 60
-          dockerHost:
-            uri: "tcp://192.168.0.5:2376"
-          readTimeout: 60
-        exposeDockerHost: true
-        name: "docker"
-        templates:
-        - connector:
-            jnlp:
-              jenkinsUrl: "http://192.168.0.5:8080/"
-              jnlpLauncher:
-                workDirSettings:
-                  disabled: false
-                  failIfWorkDirIsMissing: false
-                  internalDir: "remoting"
-          dockerTemplateBase:
-            cpuPeriod: 0
-            cpuQuota: 0
-            image: "jenkins/jnlp-agent-docker"
-          instanceCapStr: "1"
-          labelString: "jnlp-agent"
-          name: "jnlp-agent"
-          pullStrategy: PULL_ALWAYS
-          pullTimeout: 300
 security:
   queueItemAuthenticator:
     authenticators:
@@ -57,14 +30,14 @@ jobs:
   - file: /startup/job.groovy
 unclassified:
   location:
-    url: http://192.168.0.5:8080/
+    url: https://jenkins.greatscottgadgets.com/
   gitHubConfiguration:
     apiRateLimitChecker: ThrottleForNormalize
     endpoints:
     - apiUri: "https://api.github.com"
       name: "github"
   gitHubPluginConfig:
-    hookUrl: "http://192.168.0.5:8080/github-webhook/"
+    hookUrl: "https://jenkins.greatscottgadgets.com/github-webhook/"
   timestamper:
     allPipelines: false
     elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"

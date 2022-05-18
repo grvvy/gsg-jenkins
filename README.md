@@ -1,7 +1,7 @@
 # gsg-jenkins
 
 Tools and instructions for creating and using a build server for testing GSG hardware
-
+https://www.yougetsignal.com/tools/open-ports/?msclkid=81d1d4d0c10211ec81b7ab758d2f62f7
 # Instructions WIP
 
 ```bash
@@ -18,44 +18,23 @@ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
+sudo apt-get install docker-ce docker-ce-cli containerd.io openssh-server openssh-client
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo pip install --upgrade capablerobot_usbhub
 source ~/.profile
-sudo cp 20-rfcat.rules 40-ubertooth.rules 52-hackrf.rules 54-greatfet.rules 60-luna.rules /home/<user>/.local/lib/python3.8/site-packages/50-capablerobot-usbhub.rules /etc/udev/rules.d/
+cd udev-rules/
+sudo cp 20-rfcat.rules 40-ubertooth.rules 52-hackrf.rules 54-greatfet.rules 60-luna.rules 99-docker_tty.rules /home/<user>/.local/lib/python3.8/site-packages/50-capablerobot-usbhub.rules /etc/udev/rules.d/
 sudo udevadm control --reload
 sudo udevadm trigger
 ```
 
-unplug and re-plug both usb hubs
-
+# To disable suspend on laptop lid close, open logind.conf in your terminal:
 ```bash
-#!/bin/bash
-sudo systemctl edit docker.service
+sudo nano /etc/systemd/logind.conf
 ```
+and make sure the following option is not commented out and is set to ignore: `HandleLidSwitch=ignore`
 
-add the following lines:
-
-```bash
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
-```
-
-CTRL+X to exit and save the file
-
-```bash
-#!/bin/bash
-sudo systemctl daemon-reload
-sudo systemctl restart docker.service
-```
-
-check that the change happened: (port number 2376)
-
-```bash
-#!/bin/bash
-sudo netstat -lntp | grep dockerd
-```
+Next, unplug and re-plug both usb hubs, then run:
 
 ```bash
 #!/bin/bash
@@ -72,6 +51,7 @@ see internal documentation for obtaining .env secrets file and for openvpn setup
 
 ```bash
 #!/bin/bash
-docker-compose build --build-arg DOCKER_GROUP_ID=$(cut -d: -f3 < <(getent group docker)) --no-cache
-docker-compose up --no-build
+docker-compose build --build-arg DOCKER_GROUP_ID=$(cut -d: -f3 < <(getent group docker))
+docker-compose up --no-build --detach
+docker exec -u root jenkins-controller sh -c "dockerd > /var/log/dockerd.log 2>&1 &"
 ```

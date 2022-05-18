@@ -1,0 +1,2 @@
+# Apollo
+ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="615c", MODE="0660", GROUP="plugdev"

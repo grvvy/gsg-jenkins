@@ -24,7 +24,7 @@ organizationFolder('gsg-org') {
     }
     triggers {
         periodicFolderTrigger {
-            interval('1m')
+            interval('1d')
         }
     }
     orphanedItemStrategy {

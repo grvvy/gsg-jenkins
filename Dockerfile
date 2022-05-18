@@ -1,4 +1,4 @@
-# Base image
+# Jenkins controller definition for testing GSG hardware
 FROM jenkins/jenkins:2.339
 USER root
 
@@ -28,7 +28,9 @@ RUN echo "deb [arch=$(dpkg --print-architecture) \
   signed-by=/usr/share/keyrings/docker-archive-keyring.asc] \
   https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-RUN apt-get update && apt-get install -y docker-ce-cli
+RUN apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io python3 python3-pip
+RUN apt-get install -y libusb-1.0-0-dev
+RUN pip3 install --upgrade capablerobot_usbhub
 
 EXPOSE 8080
 USER jenkins
